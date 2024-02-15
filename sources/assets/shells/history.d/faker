@@ -1,0 +1,4 @@
+faker address
+faker --repeat 10 first_name
+faker --lang fr_FR iban
+faker profile ssn,birthdate

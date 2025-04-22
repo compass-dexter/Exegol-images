@@ -95,29 +95,11 @@ function install_androguard() {
 function install_mobsf() {
     # CODE-CHECK-WHITELIST=add-aliases
     colorecho "Installing Mobile Security Framework"
-    fapt wkhtmltopdf libxmlsec1 libxmlsec1-dev
-    git -C /opt/tools clone --depth 1 https://github.com/MobSF/Mobile-Security-Framework-MobSF MobSF
-    cd /opt/tools/MobSF || exit
-    # pipx --preinstall git+https://github.com/MobSF/yara-python-dex.git /opt/tools/MobSF would be needed for ARM64
-    #  in the mean time, switching to manual venv and an alias for mobsf
-    local temp_fix_limit="2025-08-01"
-    if [[ "$(date +%Y%m%d)" -gt "$(date -d $temp_fix_limit +%Y%m%d)" ]]; then
-      criticalecho "Temp fix expired. Exiting." # check if pipx supports preinstall now
-    else
-      python3 -m venv --system-site-packages ./venv
-      ./venv/bin/python3 -m pip install git+https://github.com/MobSF/yara-python-dex.git
-      ./venv/bin/python3 -m pip install .
-      # https://github.com/MobSF/Mobile-Security-Framework-MobSF/issues/2503
-      local temp_fix_limit="2025-04-01"
-      if [[ "$(date +%Y%m%d)" -gt "$(date -d $temp_fix_limit +%Y%m%d)" ]]; then
-        criticalecho "Temp fix expired. Exiting." # check if pipx supports preinstall now
-      else
-        pip install xmlsec==1.3.14
-      fi
-    fi
-    add-aliases mobsf # alias is only needed with venv and can be removed when switching back to pipx
+    fapt wkhtmltopdf # required for PDF generation
+    pipx install --system-site-packages --preinstall git+https://github.com/MobSF/yara-python-dex.git mobsf
+    /root/.local/share/pipx/venvs/mobsf/bin/python /root/.local/share/pipx/venvs/mobsf/lib/python3.11/site-packages/mobsf/MobSF/tools_download.py /root/.MobSF
     add-history mobsf
-    add-test-command "/opt/tools/MobSF/venv/bin/python -c 'from mobsf.MobSF.settings import VERSION; print(VERSION)'"
+    add-test-command "/root/.local/share/pipx/venvs/mobsf/bin/python -c 'from mobsf.MobSF.init import VERSION; print(VERSION)'"
     add-to-list "mobsf,https://github.com/MobSF/Mobile-Security-Framework-MobSF,Automated and all-in-one mobile application (Android/iOS/Windows) pen-testing malware analysis and security assessment framework"
 }
 
